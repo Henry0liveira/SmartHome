@@ -61,6 +61,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+/*
   Widget _buildConnectedDevice(String deviceName) {
     return Container(
       width: 298,
@@ -80,6 +81,7 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+*/
 
   Widget _buildActionButtons() {
     return Padding(
