@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'home.dart';
 import 'devices.dart';
 import 'settings.dart';
+import 'login.dart'; // Altere se o nome da sua tela de login for diferente
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final nomeUsuario = user?.displayName ?? "Usuário sem nome";
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -23,7 +33,8 @@ class ProfileScreen extends StatelessWidget {
                   height: 100,
                   decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image: NetworkImage('https://cdn-icons-png.flaticon.com/512/9187/9187532.png'),
+                      image: NetworkImage(
+                          'https://cdn-icons-png.flaticon.com/512/9187/9187532.png'),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -33,9 +44,9 @@ class ProfileScreen extends StatelessWidget {
               // Nome do usuário
               Container(
                 margin: const EdgeInsets.only(top: 40),
-                child: const Text(
-                  '{NOME USUÁRIO}',
-                  style: TextStyle(
+                child: Text(
+                  nomeUsuario,
+                  style: const TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 36,
                     color: Colors.white,
@@ -43,7 +54,6 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
 
-         
               // Botões inferiores
               _buildActionButtons(),
             ],
@@ -61,42 +71,22 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-/*
-  Widget _buildConnectedDevice(String deviceName) {
-    return Container(
-      width: 298,
-      height: 60,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black),
-      ),
-      child: Center(
-        child: Text(
-          deviceName,
-          style: const TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 25,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-  }
-*/
-
   Widget _buildActionButtons() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 61, vertical: 20),
       child: Column(
         children: [
-          _buildButton('Alterar dados', Icons.edit, 477),
+          _buildButton('Alterar dados', Icons.edit, () {
+            // Implementar depois
+          }),
           const SizedBox(height: 20),
-          _buildButton('Sair', Icons.exit_to_app, 577),
+          _buildButton('Sair', Icons.exit_to_app, _logout),
         ],
       ),
     );
   }
 
-  Widget _buildButton(String text, IconData icon, double top) {
+  Widget _buildButton(String text, IconData icon, VoidCallback onPressed) {
     return Container(
       width: 306,
       height: 81,
@@ -120,11 +110,22 @@ class ProfileScreen extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(icon, size: 50),
-            onPressed: () {},
+            onPressed: onPressed,
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false,
+      );
+    }
   }
 
   Widget _buildBottomNavBar(BuildContext context) {
@@ -143,7 +144,8 @@ class ProfileScreen extends StatelessWidget {
             color: Colors.black,
             onPressed: () => Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const ResponsiveHomeScreen()),
+              MaterialPageRoute(
+                  builder: (context) => const ResponsiveHomeScreen()),
             ),
           ),
           IconButton(
@@ -160,12 +162,13 @@ class ProfileScreen extends StatelessWidget {
             color: Colors.black,
             onPressed: () => Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const ConfiguracoesScreen()),
+              MaterialPageRoute(
+                  builder: (context) => const ConfiguracoesScreen()),
             ),
           ),
           IconButton(
             icon: Icon(Icons.person, size: iconSize),
-            color: const Color(0xFF1E90FF), // Ícone do usuário em azul
+            color: const Color(0xFF1E90FF),
             onPressed: () {},
           ),
         ],
