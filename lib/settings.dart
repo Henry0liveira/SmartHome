@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home.dart';
 import 'devices.dart';
 import 'user.dart';
+import './pages/dashboard_page.dart';
 
 class ConfiguracoesScreen extends StatefulWidget {
   const ConfiguracoesScreen({super.key});
@@ -89,7 +90,13 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
 
                   // Relatório de Rendimento
                   GestureDetector(
-                    onTap: () => print("Relatório de Rendimento"),
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DashboardPage(),
+                          ),
+                        ),
                     child: Container(
                       height: 81,
                       decoration: BoxDecoration(
@@ -119,10 +126,13 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
 
                   // Sobre
                   GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const SobreScreen()),
-                    ),
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SobreScreen(),
+                          ),
+                        ),
                     child: Container(
                       height: 75,
                       decoration: BoxDecoration(
@@ -142,7 +152,11 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
                               color: Colors.white,
                             ),
                           ),
-                          Icon(Icons.arrow_forward_ios, size: 38, color: Colors.white),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 38,
+                            color: Colors.white,
+                          ),
                         ],
                       ),
                     ),
@@ -152,10 +166,13 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
 
                   // Suporte
                   GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const SuporteScreen()),
-                    ),
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SuporteScreen(),
+                          ),
+                        ),
                     child: Container(
                       height: 75,
                       decoration: BoxDecoration(
@@ -175,7 +192,11 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
                               color: Colors.white,
                             ),
                           ),
-                          Icon(Icons.arrow_forward_ios, size: 38, color: Colors.white),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 38,
+                            color: Colors.white,
+                          ),
                         ],
                       ),
                     ),
@@ -204,20 +225,26 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
             icon: const Icon(Icons.home),
             iconSize: 28,
             color: Colors.black,
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ResponsiveHomeScreen()),
-            ),
+            onPressed:
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ResponsiveHomeScreen(),
+                  ),
+                ),
           ),
 
           IconButton(
             icon: const Icon(Icons.devices),
             iconSize: 28,
             color: Colors.black,
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const DevicesScreen()),
-            ),
+            onPressed:
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DevicesScreen(),
+                  ),
+                ),
           ),
 
           _buildCentralMicButton(),
@@ -225,7 +252,9 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
           IconButton(
             icon: const Icon(Icons.settings),
             iconSize: 28,
-            color: const Color(0xFF1E90FF), // Ícone azul para indicar tela ativa
+            color: const Color(
+              0xFF1E90FF,
+            ), // Ícone azul para indicar tela ativa
             onPressed: () {},
           ),
 
@@ -233,11 +262,15 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
             icon: const Icon(Icons.person),
             iconSize: 28,
             color: Colors.black,
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            onPressed:
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfileScreen(),
+                  ),
+                ),
           ),
-      )],
+        ],
       ),
     );
   }
@@ -268,10 +301,7 @@ class SobreScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF0D0D0D),
       appBar: AppBar(
         backgroundColor: const Color(0xFF2A2A2A),
-        title: const Text(
-          'Sobre',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Sobre', style: TextStyle(color: Colors.white)),
       ),
       body: const Center(
         child: Text(
@@ -292,10 +322,7 @@ class SuporteScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF0D0D0D),
       appBar: AppBar(
         backgroundColor: const Color(0xFF2A2A2A),
-        title: const Text(
-          'Suporte',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Suporte', style: TextStyle(color: Colors.white)),
       ),
       body: const Center(
         child: Text(
