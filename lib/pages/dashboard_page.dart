@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../providers/device_provider.dart'; // Mantenha este caminho relativo
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
