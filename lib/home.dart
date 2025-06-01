@@ -3,13 +3,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart'; // Import provider
-import 'devices.dart'; // Importando a tela de dispositivos
-import 'settings.dart'; // Importando a tela de configurações
+import 'package:provider/provider.dart';
+import 'devices.dart';
+import 'settings.dart';
 import 'user.dart';
-import 'models/device.dart'; // Import your Device model
-import 'providers/device_provider.dart'; // Import your DeviceProvider
-import 'package:flutter/material.dart';
+import 'models/device.dart';
+import 'providers/device_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ResponsiveHomeScreen extends StatefulWidget {
@@ -34,14 +33,11 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
 
   Future<void> _loadWeatherData() async {
     try {
-      // Solicitar permissão
       var status = await Permission.location.request();
       if (status.isGranted) {
-        // Obter posição atual
         Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
+          locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
         );
-        // Buscar dados de clima com base na localização
         await _fetchWeatherData(position.latitude, position.longitude);
       } else {
         setState(() {
@@ -58,12 +54,11 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
         condition = "Tente novamente";
         isLoading = false;
       });
-      print("Erro ao obter localização: $e");
+      debugPrint("Erro ao obter localização: $e");
     }
   }
 
   Future<void> _fetchWeatherData(double latitude, double longitude) async {
-    // Substitua API_KEY pela sua chave da OpenWeatherMap
     const apiKey = "b38d9f99ff95800411e4834117aee4d1";
     final url =
         "https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&units=metric&lang=pt_br&appid=$apiKey";
@@ -92,7 +87,7 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
         condition = "Verifique sua internet";
         isLoading = false;
       });
-      print("Erro na requisição: $e");
+      debugPrint("Erro na requisição: $e");
     }
   }
 
@@ -109,7 +104,7 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
                 _buildWeatherInfo(context),
                 SizedBox(height: 20),
                 Expanded(
-                  child: Consumer<DeviceProvider>( // Use Consumer to listen to DeviceProvider
+                  child: Consumer<DeviceProvider>(
                     builder: (context, deviceProvider, child) {
                       if (deviceProvider.devices.isEmpty) {
                         return Center(
@@ -128,7 +123,7 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
                       }
                       return ListView.builder(
                         padding: EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: deviceProvider.devices.length + 1, // +1 for the add button
+                        itemCount: deviceProvider.devices.length + 1,
                         itemBuilder: (context, index) {
                           if (index < deviceProvider.devices.length) {
                             final device = deviceProvider.devices[index];
@@ -159,41 +154,70 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
   }
 
   Widget _buildDeviceCard(Device device, DeviceProvider deviceProvider) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: const Color(0xFF777777),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Icon(device.icon, size: 40, color: Colors.white),
-          SizedBox(width: 15),
-          Expanded(
-            child: Text(
-              device.name,
-              style: TextStyle(
-                fontFamily: 'IBM Plex Sans',
-                fontSize: 18,
-                color: Colors.white,
+  // Função auxiliar para formatar o tempo de uso
+  String formatUsageTime(int totalSeconds) {
+    if (totalSeconds < 60) {
+      return '$totalSeconds s';
+    } else if (totalSeconds < 3600) {
+      int minutes = totalSeconds ~/ 60;
+      int remainingSeconds = totalSeconds % 60;
+      return '$minutes min ${remainingSeconds > 0 ? '$remainingSeconds s' : ''}';
+    } else {
+      int hours = totalSeconds ~/ 3600;
+      int remainingMinutes = (totalSeconds % 3600) ~/ 60;
+      return '$hours h ${remainingMinutes > 0 ? '$remainingMinutes min' : ''}';
+    }
+  }
+
+  return Container(
+    margin: const EdgeInsets.symmetric(vertical: 10),
+    padding: const EdgeInsets.all(15),
+    decoration: BoxDecoration(
+      color: const Color(0xFF777777),
+      borderRadius: BorderRadius.circular(15),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Icon(device.icon, size: 40, color: Colors.white),
+        SizedBox(width: 15),
+        Expanded(
+          child: Column( // Alterado para Column para exibir nome e uso
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                device.name,
+                style: TextStyle(
+                  fontFamily: 'IBM Plex Sans',
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
               ),
-            ),
+              SizedBox(height: 4), // Pequeno espaço entre nome e uso
+              Text(
+                'Uso total: ${formatUsageTime(device.totalUsage)}', // Exibe o tempo de uso
+                style: TextStyle(
+                  fontFamily: 'IBM Plex Sans',
+                  fontSize: 14,
+                  color: Colors.white70,
+                ),
+              ),
+            ],
           ),
-          Switch(
-            value: device.isOn,
-            onChanged: (newValue) {
-              deviceProvider.updateDeviceStatus(device.id, newValue);
-            },
-            activeColor: Colors.white,
-            activeTrackColor: Color(0xFF1E90FF),
-            inactiveThumbColor: Colors.grey.shade400,
-            inactiveTrackColor: Colors.grey.shade600,
-          ),
-        ],
-      ),
-    );
+        ),
+        Switch(
+          value: device.isOn,
+          onChanged: (_) {
+            deviceProvider.toggleDeviceState(device.id);
+          },
+          activeThumbColor: Colors.white,
+          activeTrackColor: Color(0xFF1E90FF),
+          inactiveThumbColor: Colors.grey.shade400,
+          inactiveTrackColor: Colors.grey.shade600,
+        ),
+      ],
+    ),
+  );
   }
 
   Widget _buildAppBar(BuildContext context) {
@@ -217,7 +241,6 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
   }
 
   Widget _buildWeatherInfo(BuildContext context) {
-    
     final user = FirebaseAuth.instance.currentUser;
     final nomeUsuario = user?.displayName ?? "Usuário sem nome";
     return Padding(
@@ -252,7 +275,6 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
                   ),
                 ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-          // Toggle button for lights
           _buildLightToggleButton(context),
         ],
       ),
@@ -292,7 +314,6 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
   Widget _buildPlusButton() {
     return GestureDetector(
       onTap: () {
-        // Navigate to the DevicesScreen
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const DevicesScreen()),
@@ -324,53 +345,45 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Home (selecionado)
           IconButton(
             icon: Icon(Icons.home),
             iconSize: 28,
             color: const Color(0xFF1E90FF),
             onPressed: () {},
           ),
-          
           IconButton(
             icon: Icon(Icons.devices),
             iconSize: 28,
             color: Colors.black,
             onPressed: () {
-              print("Navegando para Tela de Dispositivos");
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const DevicesScreen()),
               );
             },
           ),
-          // Microfone central
           _buildCentralMicButton(),
-          // Settings
           IconButton(
             icon: Icon(Icons.settings),
             iconSize: 28,
             color: Colors.black,
             onPressed: () {
-              
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ConfiguracoesScreen()),
               );
             },
           ),
-          // User
           IconButton(
             icon: Icon(Icons.person),
             iconSize: 28,
             color: Colors.black,
             onPressed: () {
-              
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ProfileScreen()),
               );
-             },
+            },
           ),
         ],
       ),
