@@ -275,41 +275,12 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
                   ),
                 ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-          _buildLightToggleButton(context),
         ],
       ),
     );
   }
 
-  Widget _buildLightToggleButton(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _lightsOn = !_lightsOn;
-        });
-      },
-      child: Container(
-        width: 142,
-        height: 42,
-        decoration: BoxDecoration(
-          color: _lightsOn ? Colors.red : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFF1E90FF)),
-        ),
-        child: Center(
-          child: Text(
-            _lightsOn ? 'Desligar todas as luzes' : 'Ligar todas as luzes',
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: _lightsOn ? Colors.white : Colors.black,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildPlusButton() {
     return GestureDetector(
