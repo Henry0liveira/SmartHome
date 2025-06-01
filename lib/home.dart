@@ -210,7 +210,7 @@ class _ResponsiveHomeScreenState extends State<ResponsiveHomeScreen> {
           onChanged: (_) {
             deviceProvider.toggleDeviceState(device.id);
           },
-          activeThumbColor: Colors.white,
+          activeColor: Colors.white,
           activeTrackColor: Color(0xFF1E90FF),
           inactiveThumbColor: Colors.grey.shade400,
           inactiveTrackColor: Colors.grey.shade600,
