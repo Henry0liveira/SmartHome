@@ -45,58 +45,14 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
                 children: [
                   const SizedBox(height: 82),
 
-                  // Modo Escuro
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        modoEscuro = !modoEscuro;
-                      });
-                    },
-                    child: Container(
-                      height: 81,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2A2A2A),
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 22),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Modo Escuro',
-                            style: TextStyle(
-                              fontFamily: 'IBM Plex Sans',
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Switch(
-                            value: modoEscuro,
-                            onChanged: (value) {
-                              setState(() {
-                                modoEscuro = value;
-                              });
-                            },
-                            activeColor: Colors.white,
-                            activeTrackColor: Colors.black,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
                   // Relatório de Rendimento
                   GestureDetector(
-                    onTap:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const DashboardPage(),
-                          ),
-                        ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DashboardPage(),
+                      ),
+                    ),
                     child: Container(
                       height: 81,
                       decoration: BoxDecoration(
@@ -126,13 +82,12 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
 
                   // Sobre
                   GestureDetector(
-                    onTap:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SobreScreen(),
-                          ),
-                        ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SobreScreen(),
+                      ),
+                    ),
                     child: Container(
                       height: 75,
                       decoration: BoxDecoration(
@@ -166,13 +121,12 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
 
                   // Suporte
                   GestureDetector(
-                    onTap:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SuporteScreen(),
-                          ),
-                        ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SuporteScreen(),
+                      ),
+                    ),
                     child: Container(
                       height: 75,
                       decoration: BoxDecoration(
@@ -225,50 +179,41 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
             icon: const Icon(Icons.home),
             iconSize: 28,
             color: Colors.black,
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ResponsiveHomeScreen(),
-                  ),
-                ),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ResponsiveHomeScreen(),
+              ),
+            ),
           ),
-
           IconButton(
             icon: const Icon(Icons.devices),
             iconSize: 28,
             color: Colors.black,
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const DevicesScreen(),
-                  ),
-                ),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const DevicesScreen(),
+              ),
+            ),
           ),
-
           _buildCentralMicButton(),
-
           IconButton(
             icon: const Icon(Icons.settings),
             iconSize: 28,
-            color: const Color(
-              0xFF1E90FF,
-            ), // Ícone azul para indicar tela ativa
+            color: const Color(0xFF1E90FF), // Tela ativa
             onPressed: () {},
           ),
-
           IconButton(
             icon: const Icon(Icons.person),
             iconSize: 28,
             color: Colors.black,
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ProfileScreen(),
-                  ),
-                ),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ProfileScreen(),
+              ),
+            ),
           ),
         ],
       ),
@@ -303,10 +248,14 @@ class SobreScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF2A2A2A),
         title: const Text('Sobre', style: TextStyle(color: Colors.white)),
       ),
-      body: const Center(
-        child: Text(
-          'Informações sobre o aplicativo.',
-          style: TextStyle(color: Colors.white, fontSize: 20),
+      body: const Padding(
+        padding: EdgeInsets.all(20),
+        child: Center(
+          child: Text(
+            'SmartHome é um aplicativo moderno que permite controlar e monitorar seus dispositivos domésticos de forma simples e intuitiva.',
+            style: TextStyle(color: Colors.white, fontSize: 18),
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );
@@ -324,10 +273,14 @@ class SuporteScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF2A2A2A),
         title: const Text('Suporte', style: TextStyle(color: Colors.white)),
       ),
-      body: const Center(
-        child: Text(
-          'Entre em contato com o suporte.',
-          style: TextStyle(color: Colors.white, fontSize: 20),
+      body: const Padding(
+        padding: EdgeInsets.all(20),
+        child: Center(
+          child: Text(
+            'Entre em contato: suporte@smarthome.com',
+            style: TextStyle(color: Colors.white, fontSize: 18),
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );
