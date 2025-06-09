@@ -13,6 +13,25 @@ class SomPage extends StatefulWidget {
 class _SomPageState extends State<SomPage> {
   bool controleIntensidade = false;
   final TextEditingController nomeSomController = TextEditingController();
+  String? marcaSelecionada;
+
+  final List<String> marcasSom = [
+    'Samsung',
+    'LG',
+    'Sony',
+    'JBL',
+    'Bose',
+    'Philips',
+    'Harman Kardon',
+    'Yamaha',
+    'Pioneer',
+    'Denon',
+    'Multilaser',
+    'Positivo',
+    'Intelbras',
+    'Xiaomi',
+    'Outro'
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +71,46 @@ class _SomPageState extends State<SomPage> {
                       vertical: 20,
                       horizontal: 16,
                     ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2A2A2A),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: marcaSelecionada,
+                    hint: const Text(
+                      'Selecione a Marca',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                    iconSize: 24,
+                    elevation: 16,
+                    style: const TextStyle(color: Colors.white),
+                    dropdownColor: const Color(0xFF2A2A2A),
+                    isExpanded: true,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        marcaSelecionada = newValue;
+                      });
+                    },
+                    items: marcasSom.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Text(
+                            value,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
               ),
@@ -99,18 +158,29 @@ class _SomPageState extends State<SomPage> {
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
-                  if (nomeSomController.text.isNotEmpty) {
+                  if (nomeSomController.text.isNotEmpty && marcaSelecionada != null) {
+                    final deviceName = marcaSelecionada == 'Outro' 
+                        ? nomeSomController.text 
+                        : '${marcaSelecionada!} - ${nomeSomController.text}';
+                    
                     final newDevice = Device(
                       id: '', // Will be assigned by Firebase
-                      name: nomeSomController.text,
+                      name: deviceName,
                       icon: Icons.speaker, // Use appropriate icon
                       isOn: false,
                     );
                     Provider.of<DeviceProvider>(context, listen: false).addDevice(newDevice);
                     Navigator.pop(context);
                   } else {
+                    String message = '';
+                    if (nomeSomController.text.isEmpty) {
+                      message = 'Por favor, digite o nome do dispositivo de som.';
+                    } else if (marcaSelecionada == null) {
+                      message = 'Por favor, selecione uma marca.';
+                    }
+                    
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Por favor, digite o nome do dispositivo de som.')),
+                      SnackBar(content: Text(message)),
                     );
                   }
                 },

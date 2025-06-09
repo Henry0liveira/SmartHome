@@ -1,94 +1,124 @@
 {
-  "air_conditioner_brands": [
+  "brands": [
     {
       "id": "br001",
       "name": "Daikin",
       "country_of_origin": "Japan",
-      "website": "https://www.daikin.com/"
+      "website": "https://www.daikin.com/",
+      "ir_code_on": "0171",
+      "ir_code_off": "0171"
     },
     {
       "id": "br002",
       "name": "LG",
       "country_of_origin": "South Korea",
-      "website": "https://www.lg.com/"
+      "website": "https://www.lg.com/",
+      "ir_code_on": "0197",
+      "ir_code_off": "0197"
     },
     {
       "id": "br003",
       "name": "Samsung",
       "country_of_origin": "South Korea",
-      "website": "https://www.samsung.com/"
+      "website": "https://www.samsung.com/",
+      "ir_code_on": "0188",
+      "ir_code_off": "0188"
     },
     {
       "id": "br004",
       "name": "Carrier",
       "country_of_origin": "USA",
-      "website": "https://www.carrier.com/"
+      "website": "https://www.carrier.com/",
+      "ir_code_on": "0203",
+      "ir_code_off": "0203"
     },
     {
       "id": "br005",
       "name": "Midea",
       "country_of_origin": "China",
-      "website": "https://www.midea.com/"
+      "website": "https://www.midea.com/",
+      "ir_code_on": "0260",
+      "ir_code_off": "0260"
     },
     {
       "id": "br006",
       "name": "Fujitsu",
       "country_of_origin": "Japan",
-      "website": "https://www.fujitsu.com/"
+      "website": "https://www.fujitsu.com/",
+      "ir_code_on": "0127",
+      "ir_code_off": "0127"
     },
     {
       "id": "br007",
       "name": "Gree",
       "country_of_origin": "China",
-      "website": "https://www.gree.com.cn/"
+      "website": "https://www.gree.com.cn/",
+      "ir_code_on": "0309",
+      "ir_code_off": "0309"
     },
     {
       "id": "br008",
       "name": "Panasonic",
       "country_of_origin": "Japan",
-      "website": "https://www.panasonic.com/"
+      "website": "https://www.panasonic.com/",
+      "ir_code_on": "0138",
+      "ir_code_off": "0138"
     },
     {
       "id": "br009",
       "name": "Hitachi",
       "country_of_origin": "Japan",
-      "website": "https://www.hitachi.com/"
+      "website": "https://www.hitachi.com/",
+      "ir_code_on": "0118",
+      "ir_code_off": "0118"
     },
     {
       "id": "br010",
       "name": "Trane",
       "country_of_origin": "USA",
-      "website": "https://www.trane.com/"
+      "website": "https://www.trane.com/",
+      "ir_code_on": "0227",
+      "ir_code_off": "0227"
     },
     {
       "id": "br011",
       "name": "Electrolux",
       "country_of_origin": "Sweden",
-      "website": "https://www.electrolux.com/"
+      "website": "https://www.electrolux.com/",
+      "ir_code_on": "0216",
+      "ir_code_off": "0216"
     },
     {
       "id": "br012",
       "name": "Whirlpool",
       "country_of_origin": "USA",
-      "website": "https://www.whirlpool.com/"
+      "website": "https://www.whirlpool.com/",
+      "ir_code_on": "0164",
+      "ir_code_off": "0164"
     },
     {
       "id": "br013",
       "name": "Philco",
       "country_of_origin": "USA",
-      "website": "https://www.philco.com.br/"
+      "website": "https://www.philco.com.br/",
+      "ir_code_on": "0164",
+      "ir_code_off": "0164"
     },
     {
       "id": "br014",
       "name": "Consul",
       "country_of_origin": "Brazil",
-      "website": "https://www.consul.com.br/"
+      "website": "https://www.consul.com.br/",
+      "ir_code_on": "993",
+      "ir_code_off": "993"
     },
     {
       "id": "br015",
       "name": "Brastemp",
       "country_of_origin": "Brazil",
-      "website": "https://www.brastemp.com.br/"
+      "website": "https://www.brastemp.com.br/",
+      "ir_code_on": "993",
+      "ir_code_off": "993"
     }
   ]
 }
