@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class BluetoothPage extends StatefulWidget {
@@ -10,12 +10,11 @@ class BluetoothPage extends StatefulWidget {
 }
 
 class _BluetoothPageState extends State<BluetoothPage> {
-  FlutterBluetoothSerial bluetooth = FlutterBluetoothSerial.instance;
   bool isBluetoothEnabled = false;
   bool isScanning = false;
-  BluetoothConnection? connection;
-  List<BluetoothDiscoveryResult> discoveredDevices = [];
-  List<BluetoothDevice> pairedDevices = [];
+  BluetoothDevice? connectedDevice;
+  List<ScanResult> scanResults = [];
+  List<BluetoothDevice> connectedDevices = [];
 
   @override
   void initState() {
@@ -24,15 +23,34 @@ class _BluetoothPageState extends State<BluetoothPage> {
   }
 
   Future<void> _initializeBluetooth() async {
-    // Verifica se o Bluetooth está habilitado
-    isBluetoothEnabled = await bluetooth.isEnabled ?? false;
+    // Verifica o estado do Bluetooth
+    await _checkBluetoothState();
     
-    if (isBluetoothEnabled) {
-      // Carrega dispositivos pareados
-      await _loadPairedDevices();
+    // Carrega dispositivos já conectados
+    await _loadConnectedDevices();
+    
+    // Escuta mudanças no estado do Bluetooth
+    FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
+      setState(() {
+        isBluetoothEnabled = state == BluetoothAdapterState.on;
+      });
+    });
+  }
+
+  Future<void> _checkBluetoothState() async {
+    final state = await FlutterBluePlus.adapterState.first;
+    setState(() {
+      isBluetoothEnabled = state == BluetoothAdapterState.on;
+    });
+  }
+
+  Future<void> _loadConnectedDevices() async {
+    try {
+      connectedDevices = await FlutterBluePlus.connectedDevices;
+      setState(() {});
+    } catch (e) {
+      print('Erro ao carregar dispositivos conectados: $e');
     }
-    
-    setState(() {});
   }
 
   Future<void> _requestPermissions() async {
@@ -56,29 +74,20 @@ class _BluetoothPageState extends State<BluetoothPage> {
   }
 
   Future<void> _enableBluetooth() async {
-    await _requestPermissions();
-    
-    if (!isBluetoothEnabled) {
-      await bluetooth.requestEnable();
-      isBluetoothEnabled = await bluetooth.isEnabled ?? false;
-      
-      if (isBluetoothEnabled) {
-        await _loadPairedDevices();
-      }
-      setState(() {});
-    }
-  }
-
-  Future<void> _loadPairedDevices() async {
     try {
-      pairedDevices = await bluetooth.getBondedDevices();
-      setState(() {});
+      await FlutterBluePlus.turnOn();
+      await _checkBluetoothState();
     } catch (e) {
-      print('Erro ao carregar dispositivos pareados: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao ativar Bluetooth: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
-  Future<void> _startDiscovery() async {
+  Future<void> _startScan() async {
     if (!isBluetoothEnabled) {
       await _enableBluetooth();
       return;
@@ -88,22 +97,30 @@ class _BluetoothPageState extends State<BluetoothPage> {
 
     setState(() {
       isScanning = true;
-      discoveredDevices.clear();
+      scanResults.clear();
     });
 
     try {
-      bluetooth.startDiscovery().listen((result) {
+      // Para o scan se já estiver rodando
+      await FlutterBluePlus.stopScan();
+      
+      // Escuta os resultados do scan
+      FlutterBluePlus.scanResults.listen((results) {
         setState(() {
-          // Evita duplicatas
-          if (!discoveredDevices.any((d) => d.device.address == result.device.address)) {
-            discoveredDevices.add(result);
-          }
-        });
-      }).onDone(() {
-        setState(() {
-          isScanning = false;
+          scanResults = results;
         });
       });
+
+      // Inicia o scan por 10 segundos
+      await FlutterBluePlus.startScan(
+        timeout: const Duration(seconds: 10),
+        androidUsesFineLocation: true,
+      );
+
+      setState(() {
+        isScanning = false;
+      });
+
     } catch (e) {
       setState(() {
         isScanning = false;
@@ -119,20 +136,32 @@ class _BluetoothPageState extends State<BluetoothPage> {
 
   Future<void> _connectToDevice(BluetoothDevice device) async {
     try {
-      if (connection != null) {
-        await connection!.close();
-      }
+      // Mostra indicador de carregamento
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
 
-      connection = await BluetoothConnection.toAddress(device.address);
+      await device.connect(timeout: const Duration(seconds: 10));
       
+      setState(() {
+        connectedDevice = device;
+      });
+
+      // Fecha o indicador de carregamento
+      Navigator.of(context).pop();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Conectado a ${device.name ?? 'Dispositivo'}'),
+          content: Text('Conectado a ${device.platformName.isNotEmpty ? device.platformName : 'Dispositivo'}'),
           backgroundColor: Colors.green,
         ),
       );
 
-      // Retorna para a tela anterior após conexão
+      // Retorna para a tela anterior após 2 segundos
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
           Navigator.pop(context);
@@ -140,6 +169,9 @@ class _BluetoothPageState extends State<BluetoothPage> {
       });
 
     } catch (e) {
+      // Fecha o indicador de carregamento
+      Navigator.of(context).pop();
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erro ao conectar: $e'),
@@ -149,15 +181,30 @@ class _BluetoothPageState extends State<BluetoothPage> {
     }
   }
 
-  Future<void> _disconnect() async {
-    if (connection != null) {
-      await connection!.close();
-      connection = null;
+  Future<void> _disconnectDevice(BluetoothDevice device) async {
+    try {
+      await device.disconnect();
       
+      setState(() {
+        if (connectedDevice == device) {
+          connectedDevice = null;
+        }
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Desconectado'),
+        SnackBar(
+          content: Text('Desconectado de ${device.platformName.isNotEmpty ? device.platformName : 'Dispositivo'}'),
           backgroundColor: Colors.orange,
+        ),
+      );
+
+      await _loadConnectedDevices();
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao desconectar: $e'),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -165,9 +212,7 @@ class _BluetoothPageState extends State<BluetoothPage> {
 
   @override
   void dispose() {
-    if (connection != null) {
-      connection!.close();
-    }
+    FlutterBluePlus.stopScan();
     super.dispose();
   }
 
@@ -192,7 +237,7 @@ class _BluetoothPageState extends State<BluetoothPage> {
               isScanning ? Icons.bluetooth_searching : Icons.refresh,
               color: Colors.white,
             ),
-            onPressed: isScanning ? null : _startDiscovery,
+            onPressed: isScanning ? null : _startScan,
           ),
         ],
       ),
@@ -229,10 +274,10 @@ class _BluetoothPageState extends State<BluetoothPage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (connection != null)
-                        const Text(
-                          'Dispositivo Conectado',
-                          style: TextStyle(
+                      if (connectedDevice != null)
+                        Text(
+                          'Conectado: ${connectedDevice!.platformName.isNotEmpty ? connectedDevice!.platformName : 'Dispositivo'}',
+                          style: const TextStyle(
                             color: Colors.green,
                             fontSize: 12,
                           ),
@@ -262,14 +307,14 @@ class _BluetoothPageState extends State<BluetoothPage> {
             ),
           ),
 
-          // Dispositivos Pareados
-          if (pairedDevices.isNotEmpty) ...[
+          // Dispositivos Conectados
+          if (connectedDevices.isNotEmpty) ...[
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Dispositivos Pareados',
+                  'Dispositivos Conectados',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -279,11 +324,11 @@ class _BluetoothPageState extends State<BluetoothPage> {
               ),
             ),
             const SizedBox(height: 8),
-            ...pairedDevices.map((device) => _buildDeviceCard(device, true)),
+            ...connectedDevices.map((device) => _buildDeviceCard(device, true)),
           ],
 
-          // Dispositivos Descobertos
-          if (discoveredDevices.isNotEmpty) ...[
+          // Dispositivos Encontrados
+          if (scanResults.isNotEmpty) ...[
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Align(
@@ -302,11 +347,24 @@ class _BluetoothPageState extends State<BluetoothPage> {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: discoveredDevices.length,
+                itemCount: scanResults.length,
                 itemBuilder: (context, index) {
-                  final result = discoveredDevices[index];
+                  final result = scanResults[index];
                   return _buildDeviceCard(result.device, false, result.rssi);
                 },
+              ),
+            ),
+          ] else if (!isScanning && isBluetoothEnabled) ...[
+            const Expanded(
+              child: Center(
+                child: Text(
+                  'Nenhum dispositivo encontrado\nToque em "Escanear" para procurar',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
           ],
@@ -315,7 +373,7 @@ class _BluetoothPageState extends State<BluetoothPage> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: ElevatedButton(
-              onPressed: isScanning || !isBluetoothEnabled ? null : _startDiscovery,
+              onPressed: isScanning || !isBluetoothEnabled ? null : _startScan,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
@@ -351,29 +409,38 @@ class _BluetoothPageState extends State<BluetoothPage> {
     );
   }
 
-  Widget _buildDeviceCard(BluetoothDevice device, bool isPaired, [int? rssi]) {
+  Widget _buildDeviceCard(BluetoothDevice device, bool isConnected, [int? rssi]) {
+    final deviceName = device.platformName.isNotEmpty 
+        ? device.platformName 
+        : 'Dispositivo Desconhecido';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
+        color: isConnected 
+            ? const Color(0xFF1B4332) 
+            : const Color(0xFF2A2A2A),
         borderRadius: BorderRadius.circular(12),
+        border: isConnected 
+            ? Border.all(color: Colors.green, width: 2)
+            : null,
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: isPaired ? Colors.green : Colors.blue,
+            color: isConnected ? Colors.green : Colors.blue,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
-            isPaired ? Icons.bluetooth_connected : Icons.bluetooth,
+            isConnected ? Icons.bluetooth_connected : Icons.bluetooth,
             color: Colors.white,
             size: 24,
           ),
         ),
         title: Text(
-          device.name ?? 'Dispositivo Desconhecido',
+          deviceName,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -383,7 +450,7 @@ class _BluetoothPageState extends State<BluetoothPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              device.address,
+              device.remoteId.toString(),
               style: const TextStyle(color: Colors.white70, fontSize: 12),
             ),
             if (rssi != null) ...[
@@ -409,14 +476,19 @@ class _BluetoothPageState extends State<BluetoothPage> {
           ],
         ),
         trailing: ElevatedButton(
-          onPressed: () => _connectToDevice(device),
+          onPressed: () => isConnected 
+              ? _disconnectDevice(device) 
+              : _connectToDevice(device),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
+            backgroundColor: isConnected ? Colors.red : Colors.blue,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
-          child: const Text('Conectar', style: TextStyle(fontSize: 12)),
+          child: Text(
+            isConnected ? 'Desconectar' : 'Conectar',
+            style: const TextStyle(fontSize: 12),
+          ),
         ),
       ),
     );
