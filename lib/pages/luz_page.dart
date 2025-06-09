@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/device.dart';
 import '../providers/device_provider.dart';
+import 'bluetooth_page.dart'; // Import da nova página
 
 class LuzPage extends StatefulWidget {
   const LuzPage({super.key});
@@ -38,6 +39,25 @@ class _LuzPageState extends State<LuzPage> {
         backgroundColor: Colors.black,
         elevation: 0,
         title: const Text('Device Lamp', style: TextStyle(color: Colors.white)),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.bluetooth,
+              color: Colors.white,
+              size: 28,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BluetoothPage(),
+                ),
+              );
+            },
+            tooltip: 'Conectar Bluetooth',
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Center(
         child: SingleChildScrollView(
